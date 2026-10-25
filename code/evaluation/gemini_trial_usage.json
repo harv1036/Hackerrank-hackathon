@@ -1,0 +1,2 @@
+{"model": "gemini-3.1-flash-lite", "provider": "Google (free tier)", "purpose": "vision re-extraction of 11 screenshots and 4 PDFs (code/extract.py)", "calls": 15, "input_tokens": 19238, "output_tokens": 1402, "cache_hits": 0, "date": "2026-10-25",
+ "note": "Experiment only. Its output was NOT used for output.csv; see evaluation_report.md section 5."}

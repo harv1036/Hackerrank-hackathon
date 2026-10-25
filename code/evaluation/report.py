@@ -114,6 +114,27 @@ only in a bundle exported after `audit_at`, which may not be cited, so its verif
 Remaining known gaps on the samples: the hand-built stories (account ids that exist only in the sample answers and
 in nothing the solver can read) and two retained audit records (cases 18 and 20) that appear in no participant file.
 Accounts shared between cases with identical report times are attributed by case order, which is a heuristic.
+
+## 5. Live Gemini vision extraction trial (not used for `output.csv`)
+
+`code/extract.py` was run live with `gemini-3.1-flash-lite` on the 11 screenshots and 4 PDFs (15 calls). The model's
+readings are kept in `code/evaluation/gemini_extracted_facts_trial.json`; the shipped, hand-checked
+`code/audit/data/extracted_facts.json` stays in use. Reasons:
+
+| Check | Shipped (hand-checked) facts | Gemini facts |
+|---|---|---|
+| 32 public samples: step F1 | 0.973 | 0.942 |
+| 32 public samples: exact-case accuracy | 0.719 | 0.562 |
+| Rows of the 518-row `output.csv` that change | - | 9 (6 flip INCOMPLETE to COMPLETE) |
+
+What went wrong in the model's output: resource ids misread or replaced by other identifiers on 5 files (for example
+an account id read as a `user_` id, an export id read as a reference number, a PDF file name used as the object id);
+state and category labels that do not match the dataset's vocabulary (`IDENTIFIABLE`, `ACTIVE` instead of `PRESENT`,
+`REDACTED`); and several capture or observation times shifted. A wrong state turned five remaining records into
+"nothing remains", which would wrongly mark those cases COMPLETE. Conclusion: a small vision model is good at reading
+text but not at mapping it onto the dataset's resource-id and state conventions without a stricter prompt and
+validation, so extraction stays a one-off, human-checked step. Next improvement: validate each extracted id against the
+`PREFIX_SYSTEM` prefixes and reject answers that do not match.
 """
     with open(os.path.join(HERE, 'evaluation_report.md'), 'w', encoding='utf-8') as fh:
         fh.write(md)
@@ -137,6 +158,9 @@ Accounts shared between cases with identical report times are attributed by case
     else:
         lines.append('| - | none | 0 | 0 | 0 | 0.00 |')
         lines.append('| **Total** | | 0 | 0 | 0 | 0.00 |')
+    trial = json.load(open(os.path.join(HERE, 'gemini_trial_usage.json')))
+    tc, ti, to = trial['calls'], trial['input_tokens'], trial['output_tokens']
+    ai, ao = round(ti / tc), round(to / tc)
     um = f"""# Usage report
 
 Final full-dataset run: `python3 code/main.py` → `output.csv` ({n} requests).
@@ -152,18 +176,27 @@ The investigation itself (identity resolution, evidence parsing, state reconstru
 ordering) is deterministic code so the answer is reproducible. Two optional model hooks exist, both on Google's
 Gemini free tier and both off unless `GEMINI_API_KEY` is set:
 
-1. `gemini-2.5-flash-lite` classifies a request as DELETE / NOT_DELETE, only when the rule classifier is unsure
-   (in this dataset exactly 1 of 550 request texts; at most ~150 input tokens and 2 output tokens per call, so
-   the whole dataset costs well under 1,000 tokens).
-2. `gemini-2.5-flash` (vision) reads screenshots and PDFs (`python3 code/extract.py`, 15 files, roughly 1,500
-   input tokens per image page), replacing the shipped hand-checked `extracted_facts.json`.
+1. A small Gemini model classifies a request as DELETE / NOT_DELETE, only when the rule classifier is unsure. In
+   this dataset the rules were confident for all {n} requests, so no call was needed.
+2. A Gemini vision model reads screenshots and PDFs (`python3 code/extract.py`, 15 files). It can replace the
+   shipped hand-checked `extracted_facts.json`.
 
-The workspace used to build this solution could not reach `generativelanguage.googleapis.com`, so the recorded
-final run made **0 model calls**: the rule classifier decided every request and the shipped extraction file
-supplied the PDF/screenshot facts. The hooks, prompts (`code/prompts/`), caching and token accounting are in place;
-re-running with a key records real counts in `evaluation/usage_run.json` and regenerates this file with
-`python3 code/evaluation/report.py`. Prices listed are Gemini paid-tier list prices used only for the estimate;
-on the free tier the cost is 0.
+The final run that produced `output.csv` therefore made **0 model calls**: the rule classifier decided every
+request and the shipped, hand-checked extraction file supplied the PDF/screenshot facts.
+
+## Live Gemini extraction trial (separate from the final run)
+
+On 2026-10-25 `code/extract.py` was run live. `gemini-3.5-flash` was refused with HTTP 429 (free-tier quota) and
+`gemini-2.5-flash` returned 404, so `gemini-3.1-flash-lite` was used.
+
+| Provider | Model | Calls | Input tokens | Output tokens | Billed cost (USD) |
+|---|---|---|---|---|---|
+| Google | gemini-3.1-flash-lite | {tc} | {ti} | {to} | 0.00 (free tier) |
+
+* Average per file: {ai} input and {ao} output tokens. Cost is 0 on the free tier; no paid price list is assumed.
+* Its output scored worse than the shipped facts on the public samples (see evaluation_report.md section 5), so it
+  was **not** used for `output.csv`. The trial's raw numbers are in `code/evaluation/gemini_trial_usage.json`.
+* `GEMINI_CLASSIFY_MODEL` and `GEMINI_VISION_MODEL` select the models; both default to `gemini-3.1-flash-lite`.
 """
     with open(os.path.join(HERE, 'usage_report.md'), 'w', encoding='utf-8') as fh:
         fh.write(um)

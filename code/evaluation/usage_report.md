@@ -16,15 +16,24 @@ The investigation itself (identity resolution, evidence parsing, state reconstru
 ordering) is deterministic code so the answer is reproducible. Two optional model hooks exist, both on Google's
 Gemini free tier and both off unless `GEMINI_API_KEY` is set:
 
-1. `gemini-2.5-flash-lite` classifies a request as DELETE / NOT_DELETE, only when the rule classifier is unsure
-   (in this dataset exactly 1 of 550 request texts; at most ~150 input tokens and 2 output tokens per call, so
-   the whole dataset costs well under 1,000 tokens).
-2. `gemini-2.5-flash` (vision) reads screenshots and PDFs (`python3 code/extract.py`, 15 files, roughly 1,500
-   input tokens per image page), replacing the shipped hand-checked `extracted_facts.json`.
+1. A small Gemini model classifies a request as DELETE / NOT_DELETE, only when the rule classifier is unsure. In
+   this dataset the rules were confident for all 518 requests, so no call was needed.
+2. A Gemini vision model reads screenshots and PDFs (`python3 code/extract.py`, 15 files). It can replace the
+   shipped hand-checked `extracted_facts.json`.
 
-The workspace used to build this solution could not reach `generativelanguage.googleapis.com`, so the recorded
-final run made **0 model calls**: the rule classifier decided every request and the shipped extraction file
-supplied the PDF/screenshot facts. The hooks, prompts (`code/prompts/`), caching and token accounting are in place;
-re-running with a key records real counts in `evaluation/usage_run.json` and regenerates this file with
-`python3 code/evaluation/report.py`. Prices listed are Gemini paid-tier list prices used only for the estimate;
-on the free tier the cost is 0.
+The final run that produced `output.csv` therefore made **0 model calls**: the rule classifier decided every
+request and the shipped, hand-checked extraction file supplied the PDF/screenshot facts.
+
+## Live Gemini extraction trial (separate from the final run)
+
+On 2026-10-25 `code/extract.py` was run live. `gemini-3.5-flash` was refused with HTTP 429 (free-tier quota) and
+`gemini-2.5-flash` returned 404, so `gemini-3.1-flash-lite` was used.
+
+| Provider | Model | Calls | Input tokens | Output tokens | Billed cost (USD) |
+|---|---|---|---|---|---|
+| Google | gemini-3.1-flash-lite | 15 | 19238 | 1402 | 0.00 (free tier) |
+
+* Average per file: 1283 input and 93 output tokens. Cost is 0 on the free tier; no paid price list is assumed.
+* Its output scored worse than the shipped facts on the public samples (see evaluation_report.md section 5), so it
+  was **not** used for `output.csv`. The trial's raw numbers are in `code/evaluation/gemini_trial_usage.json`.
+* `GEMINI_CLASSIFY_MODEL` and `GEMINI_VISION_MODEL` select the models; both default to `gemini-3.1-flash-lite`.

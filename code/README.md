@@ -24,9 +24,10 @@ few seconds.
 Nothing needs a key. With `export GEMINI_API_KEY=...` (read from the environment only, never written to disk or
 logs) two hooks switch on:
 
-* `python3 code/main.py` asks `gemini-2.5-flash-lite` to classify a request only when the rule classifier is unsure.
-* `python3 code/extract.py` re-reads the 11 screenshots and 4 PDFs with `gemini-2.5-flash` (vision) and rewrites
-  `code/audit/data/extracted_facts.json`.
+* `python3 code/main.py` asks `gemini-3.1-flash-lite` (default) to classify a request only when the rule classifier is unsure.
+* `python3 code/extract.py` re-reads the 11 screenshots and 4 PDFs with the same model (vision) and rewrites
+  `code/audit/data/extracted_facts.json`. **Back that file up first**: a live trial of this step read several resource
+  ids and states wrongly (see `evaluation/evaluation_report.md` section 5), so the shipped hand-checked file is the one used.
 
 Model names can be overridden with `GEMINI_CLASSIFY_MODEL` and `GEMINI_VISION_MODEL`. Answers are cached in
 `code/cache/llm_cache.json`; call and token counts go to `code/evaluation/usage_run.json`.

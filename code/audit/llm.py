@@ -6,6 +6,8 @@
 import hashlib
 import json
 import os
+import time
+import urllib.error
 import urllib.request
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,7 +34,7 @@ def load_dotenv():
 
 
 class GeminiClient:
-    def __init__(self, api_key, classify_model='gemini-2.5-flash-lite', vision_model='gemini-2.5-flash'):
+    def __init__(self, api_key, classify_model='gemini-3.1-flash-lite', vision_model='gemini-3.1-flash-lite'):
         self.key = api_key
         self.classify_model = classify_model
         self.vision_model = vision_model
@@ -49,8 +51,8 @@ class GeminiClient:
         key = os.environ.get('GEMINI_API_KEY')
         if not key:
             return None
-        return GeminiClient(key, os.environ.get('GEMINI_CLASSIFY_MODEL', 'gemini-2.5-flash-lite'),
-                            os.environ.get('GEMINI_VISION_MODEL', 'gemini-2.5-flash'))
+        return GeminiClient(key, os.environ.get('GEMINI_CLASSIFY_MODEL', 'gemini-3.1-flash-lite'),
+                            os.environ.get('GEMINI_VISION_MODEL', 'gemini-3.1-flash-lite'))
 
     def _u(self, model):
         return self.usage.setdefault(model, {'calls': 0, 'input_tokens': 0, 'output_tokens': 0, 'cache_hits': 0})
@@ -67,8 +69,16 @@ class GeminiClient:
             f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
             data=json.dumps(body).encode('utf-8'),
             headers={'Content-Type': 'application/json', 'x-goog-api-key': self.key})
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            out = json.load(resp)
+        out = None
+        for attempt in range(6):               # rate limits (429) and overload (5xx) are usually short-lived
+            try:
+                with urllib.request.urlopen(req, timeout=60) as resp:
+                    out = json.load(resp)
+                break
+            except urllib.error.HTTPError as err:
+                if err.code not in (429, 500, 502, 503, 504) or attempt == 5:
+                    raise
+                time.sleep(min(10 * 2 ** attempt, 120))
         text = ''.join(p.get('text', '') for p in out['candidates'][0]['content']['parts']).strip()
         meta = out.get('usageMetadata', {})
         u['calls'] += 1
