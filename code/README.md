@@ -12,3 +12,6 @@ Built in seven parts; each commit runs on its own.
   analytics profiles from the deletion worker's activity rows (stage offsets, result class, cross-case elimination).
 * **Part 5 (this commit) - screenshots and PDFs.** Facts of the 11 screenshots and 4 PDFs
   (`audit/data/extracted_facts.json`) plus the data catalog's `LINK_RESOURCE_IDENTITY` links.
+* **Part 6 (this commit) - request classifier and optional Gemini.** Multilingual rule classifier ->
+  NOT_APPLICABLE; optional Gemini free-tier hooks (`GEMINI_API_KEY` from the environment or an uncommitted `.env`),
+  prompts in `code/prompts/`, `python3 code/extract.py` for vision extraction.

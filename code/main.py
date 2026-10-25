@@ -19,8 +19,9 @@ EXTRACTED = os.path.join(HERE, 'audit', 'data', 'extracted_facts.json')
 from audit.evidence import load_all          # noqa: E402
 from audit.identity import IdentityBook      # noqa: E402
 from audit.solve import Solver               # noqa: E402
-
 from audit.attribute import Attributor       # noqa: E402
+from audit.classify import classify          # noqa: E402
+from audit.llm import GeminiClient           # noqa: E402
 
 
 CATALOG_LINK = re.compile(r'belongs only to (\S+@\S+) and (user_\d+)|to (\S+@\S+) and (user_\d+)')
@@ -38,7 +39,6 @@ def catalog_links(dataset):
                 g = [x for x in m.groups() if x]
                 links[a['resource_id']] = {x.lower() for x in g}
     return links
-
 
 
 def run(dataset, requests_path, out_path, context_requests=None, llm=None):
@@ -59,6 +59,9 @@ def run(dataset, requests_path, out_path, context_requests=None, llm=None):
     extra = Attributor(dataset, solver).attribute(pool, idents, claimed, complete_cases=prelim)
     rows = []
     for case in cases:
+        if classify(case['request_text'], llm)[0] == 'NOT_DELETE':
+            rows.append((case['case_id'], 'NOT_APPLICABLE', '[]'))
+            continue
         status, steps, _ = solver.audit(case, extra.get(case['case_id'], ()))
         rows.append((case['case_id'], status, json.dumps(steps, separators=(',', ':'), ensure_ascii=False)))
     rows.sort(key=lambda r: r[0])
@@ -76,8 +79,15 @@ def main():
     ap.add_argument('--out', default=os.path.join(ROOT, 'output.csv'))
     a = ap.parse_args()
     req = a.requests or os.path.join(a.dataset, 'deletion_requests.csv')
-    rows = run(a.dataset, req, a.out)
+    llm = GeminiClient.from_env()
+    rows = run(a.dataset, req, a.out, llm=llm)
     print(f'wrote {len(rows)} rows to {a.out}')
+    usage = {'model_calls': {}, 'note': 'GEMINI_API_KEY not set: deterministic rules only' if llm is None else 'Gemini free tier'}
+    if llm is not None:
+        llm.save()
+        usage['model_calls'] = llm.usage
+    with open(os.path.join(HERE, 'evaluation', 'usage_run.json'), 'w', encoding='utf-8') as fh:
+        json.dump(usage, fh, indent=1)
 
 
 if __name__ == '__main__':
