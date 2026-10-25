@@ -14,6 +14,7 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
+EXTRACTED = os.path.join(HERE, 'audit', 'data', 'extracted_facts.json')
 
 from audit.evidence import load_all          # noqa: E402
 from audit.identity import IdentityBook      # noqa: E402
@@ -22,10 +23,30 @@ from audit.solve import Solver               # noqa: E402
 from audit.attribute import Attributor       # noqa: E402
 
 
+CATALOG_LINK = re.compile(r'belongs only to (\S+@\S+) and (user_\d+)|to (\S+@\S+) and (user_\d+)')
+
+
+def catalog_links(dataset):
+    """rid -> identifiers from the data catalog's LINK_RESOURCE_IDENTITY activity rows."""
+    links = {}
+    with open(os.path.join(dataset, 'system_activity.csv'), encoding='utf-8') as fh:
+        for a in csv.DictReader(fh):
+            if a['event_type'] != 'LINK_RESOURCE_IDENTITY':
+                continue
+            m = CATALOG_LINK.search(a['details'])
+            if m:
+                g = [x for x in m.groups() if x]
+                links[a['resource_id']] = {x.lower() for x in g}
+    return links
+
+
+
 def run(dataset, requests_path, out_path, context_requests=None, llm=None):
-    obs, scopes, manifest = load_all(dataset)
+    with open(EXTRACTED, encoding='utf-8') as fh:
+        extracted = json.load(fh)
+    obs, scopes, manifest = load_all(dataset, extracted)
     book = IdentityBook(dataset)
-    solver = Solver(obs, scopes, manifest, book)
+    solver = Solver(obs, scopes, manifest, book, catalog_links(dataset))
     cases = list(csv.DictReader(open(requests_path, encoding='utf-8')))
     idents, claimed = {}, {}
     pool = list(cases) + [c for c in (context_requests or []) if c['case_id'] not in {k['case_id'] for k in cases}]

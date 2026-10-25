@@ -10,3 +10,5 @@ Built in seven parts; each commit runs on its own.
   status, step precision / recall / F1, field and sequence accuracy.
 * **Part 4 (this commit) - keyless resources.** `audit/attribute.py` attributes deleted accounts and anonymised
   analytics profiles from the deletion worker's activity rows (stage offsets, result class, cross-case elimination).
+* **Part 5 (this commit) - screenshots and PDFs.** Facts of the 11 screenshots and 4 PDFs
+  (`audit/data/extracted_facts.json`) plus the data catalog's `LINK_RESOURCE_IDENTITY` links.

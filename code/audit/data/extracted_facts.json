@@ -1,0 +1,192 @@
+[
+ {
+  "file_id": "evidence_04",
+  "rid": "account_5762",
+  "system": "account_service",
+  "cat": "USER_PROFILE",
+  "state": "PRESENT",
+  "keys": [
+   "user_11",
+   "haruka.s1838@zoho.com",
+   "+81 90 7610 2507"
+  ],
+  "rec_time": "2026-09-26T11:00:00Z",
+  "attrs": {},
+  "note": "Customer Operations console shows the live customer profile (user_11 / account_5762) with email and phone"
+ },
+ {
+  "file_id": "evidence_09",
+  "rid": "search_428",
+  "system": "search_service",
+  "cat": "SEARCH_INDEX_ENTRY",
+  "state": "PRESENT",
+  "keys": [
+   "g.silva76@gmail.com",
+   "user_13"
+  ],
+  "rec_time": "2026-09-01T06:00:14Z",
+  "attrs": {},
+  "note": "Search console raw document search_428 for Gabriel Silva; search_1874 belongs to g.silva76.jr@gmail.com (another person)"
+ },
+ {
+  "file_id": "evidence_14",
+  "rid": "data_flow_1121",
+  "system": "integration_service",
+  "cat": "DATA_FLOW",
+  "state": "ACTIVE",
+  "keys": [
+   "jain.aditi@gmail.com"
+  ],
+  "rec_time": "2026-08-07T07:59:42Z",
+  "attrs": {},
+  "note": "Connector data_flow_1121 healthy, continuous sync of jain.aditi@gmail.com to customer_analytics_warehouse; data_flow_9846 selects another person"
+ },
+ {
+  "file_id": "evidence_19",
+  "rid": "analytics_7438",
+  "system": "analytics_platform",
+  "cat": "ANALYTICS_PROFILE",
+  "state": "IDENTIFIABLE",
+  "keys": [
+   "user_20",
+   "darwish.omar@icloud.com"
+  ],
+  "rec_time": "2026-07-13T14:22:00Z",
+  "attrs": {},
+  "note": "Analytics user profile shows name, user_20 and email"
+ },
+ {
+  "file_id": "evidence_23",
+  "rid": "export_1260",
+  "system": "export_service",
+  "cat": "USER_EXPORT",
+  "state": "PRESENT",
+  "keys": [
+   "ingrid.dahl@outlook.com"
+  ],
+  "rec_time": "2026-06-18T06:46:00Z",
+  "attrs": {},
+  "note": "export_1260 ready for download, 0 downloads, expires 25 Jun 2026; other rows belong to staff accounts"
+ },
+ {
+  "file_id": "evidence_18",
+  "rid": "export_1842",
+  "system": "export_service",
+  "cat": "USER_EXPORT",
+  "state": "PRESENT",
+  "keys": [
+   "user_18",
+   "ingrid.dahl@outlook.com"
+  ],
+  "rec_time": "2026-07-18T11:00:00Z",
+  "attrs": {},
+  "note": "Customer statement NST-2026-0718-1842 with order, payment and delivery address"
+ },
+ {
+  "file_id": "evidence_28",
+  "rid": "support_1034",
+  "system": "support_platform",
+  "cat": "SUPPORT_MESSAGE",
+  "state": "IDENTIFIABLE",
+  "keys": [
+   "kagyeman8947@fastmail.com"
+  ],
+  "rec_time": "2026-05-24T07:00:00Z",
+  "attrs": {},
+  "note": "Helpline ticket CS-5034 shows customer name and email in clear"
+ },
+ {
+  "file_id": "evidence_32",
+  "rid": "backup_9287",
+  "system": "backup_service",
+  "cat": "BACKUP_ARCHIVE",
+  "state": "ACTIVE",
+  "keys": [
+   "areed1433@gmail.com"
+  ],
+  "rec_time": "2026-04-29T09:00:00Z",
+  "attrs": {},
+  "note": "Archive backup_9287 for areed1433@gmail.com, checksum verified, retention end 26 Jul 2026, no restore block shown"
+ },
+ {
+  "file_id": "evidence_46",
+  "rid": "object_19",
+  "system": "object_storage",
+  "cat": "SUPPORT_ATTACHMENT",
+  "state": "PRESENT",
+  "keys": [
+   "priya.raman@gmail.com",
+   "user_07"
+  ],
+  "rec_time": "2026-02-13T08:00:00Z",
+  "attrs": {},
+  "note": "Object delivery_confirmation_19.pdf (v3) in the support-attachments bucket"
+ },
+ {
+  "file_id": "evidence_37",
+  "rid": "audit_record_003",
+  "system": "security_service",
+  "cat": "SECURITY_AUDIT_LOG",
+  "state": "PRESENT",
+  "keys": [
+   "user_03"
+  ],
+  "rec_time": "2026-08-25T04:03:00Z",
+  "attrs": {},
+  "note": "Signed account_closure_recorded event for user_03, integrity valid"
+ },
+ {
+  "file_id": "evidence_55",
+  "rid": "audit_record_003",
+  "system": "security_service",
+  "cat": "SECURITY_AUDIT_LOG",
+  "state": "PRESENT",
+  "keys": [
+   "user_03"
+  ],
+  "rec_time": "2026-08-25T04:03:00Z",
+  "attrs": {},
+  "note": "Compliance journal extract, retain until 25 Aug 2027"
+ },
+ {
+  "file_id": "evidence_42",
+  "rid": "tombstone_17",
+  "system": "identity_service",
+  "cat": "ACCOUNT_TOMBSTONE",
+  "state": "REDACTED",
+  "keys": [
+   "user_17"
+  ],
+  "rec_time": "2026-03-10T06:00:00Z",
+  "attrs": {},
+  "note": "Customer reference registry keeps only the stable key user_17 (retained reference); no name, email or phone"
+ },
+ {
+  "file_id": "evidence_60",
+  "rid": "marketing_001",
+  "system": "marketing_platform",
+  "cat": "MARKETING_PROFILE",
+  "state": "PRESENT",
+  "keys": [
+   "kwame-mensah@proton.me",
+   "user_09"
+  ],
+  "rec_time": "2026-09-15T23:40:00Z",
+  "attrs": {},
+  "note": "Audience Operations profile marketing_001 is live and refreshed 15 Sep 2026 23:40 UTC"
+ },
+ {
+  "file_id": "evidence_58",
+  "rid": "support_001",
+  "system": "support_platform",
+  "cat": "SUPPORT_ATTACHMENT",
+  "state": "PRESENT",
+  "keys": [
+   "priya.raman@gmail.com",
+   "+91 98765 73142"
+  ],
+  "rec_time": "2026-09-12T07:30:00Z",
+  "attrs": {},
+  "note": "Attachment delivery_address_correction.pdf of ticket CS-4827 / support_001, name email and phone in the file"
+ }
+]
