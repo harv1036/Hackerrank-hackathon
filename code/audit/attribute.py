@@ -56,6 +56,19 @@ class Attributor:
                     continue
                 off = (parse(a['event_time']) - rep) / timedelta(minutes=1)
                 if lo <= off <= hi and a['reported_result'] == want:
+                    # A deletion-worker account event immediately paired with an opposite-result
+                    # account event is commonly a neighboring workflow, not the same case.  Treat
+                    # that adjacency as negative attribution evidence instead of relying on case order.
+                    if pre == 'account' and want == 'FAILED':
+                        at = parse(a['event_time'])
+                        paired = any(
+                            b is not a and b['event_type'] == etype and b['source_system'] == 'deletion_worker'
+                            and b['reported_result'] != want
+                            and abs((parse(b['event_time']) - at).total_seconds()) <= 3
+                            for other in self.events.values() for b in other
+                        )
+                        if paired:
+                            continue
                     out.append(rid)
                     break
         if pre == 'analytics':

@@ -9,13 +9,13 @@ estimate. The 518 evaluation cases have no public answers.
 | Metric | Score |
 |---|---|
 | Case-level deletion-status accuracy | 100.0% |
-| Step precision (all 6 fields) | 99.5% |
-| Step recall | 94.3% |
-| Step F1 | 96.8% |
-| Core step F1 (ignoring evidence_id) | 96.8% |
+| Step precision (all 6 fields) | 100.0% |
+| Step recall | 94.8% |
+| Step F1 | 97.3% |
+| Core step F1 (ignoring evidence_id) | 97.3% |
 | Field-level accuracy (matched steps) | 100.0% |
-| Sequence accuracy (exact ordered steps) | 68.8% |
-| Exact-case accuracy (sequence + every evidence_id) | 68.8% |
+| Sequence accuracy (exact ordered steps) | 71.9% |
+| Exact-case accuracy (sequence + every evidence_id) | 71.9% |
 
 Per field: `phase` 100.0%, `system_id` 100.0%, `resource_id` 100.0%, `operation` 100.0%, `state` 100.0%, `evidence_id` 100.0%
 
@@ -25,7 +25,7 @@ whose account ids (`account_001`, ...) never occur in the evaluation requests.
 
 | Subset | Cases | Status acc. | Step F1 | Sequence acc. |
 |---|---|---|---|---|
-| Evaluation-like (random ids) | 24 | 100.0% | 98.8% | 87.5% |
+| Evaluation-like (random ids) | 24 | 100.0% | 99.4% | 91.7% |
 | Hand-built stories | 8 | 100.0% | 78.9% | 12.5% |
 
 ## 2. Final run on the 518 requests
@@ -49,6 +49,7 @@ only in a bundle exported after `audit_at`, which may not be cited, so its verif
 | custom_5 | Tombstone still exposes the e-mail: redact (keep the stable reference), do not delete | pass |
 | custom_6 | Recreation paths are shut before records are deleted | pass |
 | custom_7 | Access request is NOT_APPLICABLE, a French deletion request is not | pass |
+| custom_8 | An email shared by two users must not be assigned by sorted user_id | pass |
 
 
 ## 4. Failures found and improvements made
@@ -64,6 +65,8 @@ only in a bundle exported after `audit_at`, which may not be cited, so its verif
 | Odd `system_id` values (`backup_restore_service`...) | Snapshot `data_store` names the container, not the resource | Owning system derived from the resource-id prefix |
 | Case 07 missed (attachment only in a PDF) | PDFs and screenshots are not text | Facts of the 11 screenshots and 4 PDFs extracted once (`code/audit/data/extracted_facts.json`) and linked through the data-catalog `LINK_RESOURCE_IDENTITY` rows |
 | Non-deletion requests | `request_text` can be an access, correction or marketing request | Multilingual rule classifier (+ optional Gemini fallback) → NOT_APPLICABLE with `[]` |
+| Sample case 23 attributed the wrong account | A failed deletion-worker account event sitting next to an opposite-result event belongs to a neighbouring workflow, but case order paired it anyway | Such an event (within 3 s of an opposite-result account event) is no longer a candidate; sample step F1 0.968 → 0.973, sequence accuracy 0.688 → 0.719, 2 of 518 output rows changed |
+| One historical e-mail shared by two users resolved to the lowest `user_id` | Sorted-id tie-break is arbitrary | Pick the user whose e-mail history most recently owned the address at `requested_at`; if tied, resolve no identity (custom_8) |
 
 Remaining known gaps on the samples: the hand-built stories (account ids that exist only in the sample answers and
 in nothing the solver can read) and two retained audit records (cases 18 and 20) that appear in no participant file.

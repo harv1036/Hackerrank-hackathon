@@ -8,7 +8,7 @@ Final full-dataset run: `python3 code/main.py` → `output.csv` (518 requests).
 | **Total** | | 0 | 0 | 0 | 0.00 |
 
 * Total tokens: 0; average per request: 0.00; estimated cost per request: 0.0000 USD.
-* Run mode: GEMINI_API_KEY not set: deterministic rules only.
+* Run mode: Gemini free tier.
 
 ## What a model is used for
 

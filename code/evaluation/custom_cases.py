@@ -4,8 +4,10 @@
 Each case builds a tiny synthetic evidence set in memory, runs the real solver and compares the answer with
 the outcome the policy requires.  Run: python3 code/evaluation/custom_cases.py [--markdown]
 """
+import csv
 import os
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(HERE))
@@ -104,8 +106,26 @@ def case_non_deletion_request():
     return 'Access request is NOT_APPLICABLE, a French deletion request is not', got == ['NOT_DELETE', 'DELETE'], got
 
 
+def case_ambiguous_email_history():
+    from audit.identity import IdentityBook
+    with tempfile.TemporaryDirectory() as d:
+        with open(os.path.join(d, 'user_identities.csv'), 'w', newline='', encoding='utf-8') as fh:
+            w = csv.writer(fh)
+            w.writerow(['user_id', 'email', 'phone', 'email_hash', 'name'])
+            w.writerow(['user_901', 'one@example.org', '', '', 'One'])
+            w.writerow(['user_902', 'two@example.org', '', '', 'Two'])
+        with open(os.path.join(d, 'user_audit_log.csv'), 'w', newline='', encoding='utf-8') as fh:
+            w = csv.writer(fh)
+            w.writerow(['user_id', 'event_time', 'field_name', 'old_value', 'new_value'])
+            w.writerow(['user_901', '2026-01-05T00:00:00Z', 'email', 'shared@example.org', 'one@example.org'])
+            w.writerow(['user_902', '2026-01-05T00:00:00Z', 'email', 'shared@example.org', 'two@example.org'])
+        got = IdentityBook(d).resolve('shared@example.org', '2026-01-20T00:00:00Z', '2026-01-20T00:00:00Z')
+    ok = got is None
+    return 'An email shared by two users must not be assigned by sorted user_id', ok, got.user_id if got else None
+
+
 CASES = [case_historical_email, case_replica_drift, case_late_evidence_ignored, case_retained_audit_log,
-         case_tombstone_redaction, case_remediation_order, case_non_deletion_request]
+         case_tombstone_redaction, case_remediation_order, case_non_deletion_request, case_ambiguous_email_history]
 
 
 def main():

@@ -108,6 +108,8 @@ only in a bundle exported after `audit_at`, which may not be cited, so its verif
 | Odd `system_id` values (`backup_restore_service`...) | Snapshot `data_store` names the container, not the resource | Owning system derived from the resource-id prefix |
 | Case 07 missed (attachment only in a PDF) | PDFs and screenshots are not text | Facts of the 11 screenshots and 4 PDFs extracted once (`code/audit/data/extracted_facts.json`) and linked through the data-catalog `LINK_RESOURCE_IDENTITY` rows |
 | Non-deletion requests | `request_text` can be an access, correction or marketing request | Multilingual rule classifier (+ optional Gemini fallback) → NOT_APPLICABLE with `[]` |
+| Sample case 23 attributed the wrong account | A failed deletion-worker account event sitting next to an opposite-result event belongs to a neighbouring workflow, but case order paired it anyway | Such an event (within 3 s of an opposite-result account event) is no longer a candidate; sample step F1 0.968 → 0.973, sequence accuracy 0.688 → 0.719, 2 of 518 output rows changed |
+| One historical e-mail shared by two users resolved to the lowest `user_id` | Sorted-id tie-break is arbitrary | Pick the user whose e-mail history most recently owned the address at `requested_at`; if tied, resolve no identity (custom_8) |
 
 Remaining known gaps on the samples: the hand-built stories (account ids that exist only in the sample answers and
 in nothing the solver can read) and two retained audit records (cases 18 and 20) that appear in no participant file.

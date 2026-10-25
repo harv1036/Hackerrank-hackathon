@@ -59,6 +59,7 @@ Prompts live in `code/prompts/`. No organizer-only file, label or case-specific 
 
 ## Known limits
 
-* Accounts of cases that share one report time are paired by case order when evidence cannot tell them apart.
+* Accounts of cases that share one report time are paired by case order when evidence cannot tell them apart; a failed deletion-worker account event that sits within 3 seconds of an opposite-result account event is treated as a neighbouring workflow and not attributed.
+* If one historical e-mail belongs to several users, the user whose e-mail history most recently owned it at `requested_at` is chosen; if that is still tied, no identity is resolved (never chosen by sorted `user_id`).
 * Two retained audit records in the public samples appear in no participant file and are not produced.
 * Screenshot/PDF facts were extracted once and checked by eye; `extract.py` reproduces them with Gemini.
