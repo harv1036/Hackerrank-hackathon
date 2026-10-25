@@ -19,15 +19,26 @@ from audit.evidence import load_all          # noqa: E402
 from audit.identity import IdentityBook      # noqa: E402
 from audit.solve import Solver               # noqa: E402
 
+from audit.attribute import Attributor       # noqa: E402
+
 
 def run(dataset, requests_path, out_path, context_requests=None, llm=None):
     obs, scopes, manifest = load_all(dataset)
     book = IdentityBook(dataset)
     solver = Solver(obs, scopes, manifest, book)
     cases = list(csv.DictReader(open(requests_path, encoding='utf-8')))
+    idents, claimed = {}, {}
+    pool = list(cases) + [c for c in (context_requests or []) if c['case_id'] not in {k['case_id'] for k in cases}]
+    for case in pool:
+        ident, res = solver.direct_links(case)
+        if ident is not None:
+            idents[case['case_id']] = ident
+            claimed[case['case_id']] = set(res)
+    prelim = {c['case_id'] for c in pool if c['case_id'] in idents and solver.audit(c)[0] == 'COMPLETE'}
+    extra = Attributor(dataset, solver).attribute(pool, idents, claimed, complete_cases=prelim)
     rows = []
     for case in cases:
-        status, steps, _ = solver.audit(case)
+        status, steps, _ = solver.audit(case, extra.get(case['case_id'], ()))
         rows.append((case['case_id'], status, json.dumps(steps, separators=(',', ':'), ensure_ascii=False)))
     rows.sort(key=lambda r: r[0])
     with open(out_path, 'w', newline='', encoding='utf-8') as fh:

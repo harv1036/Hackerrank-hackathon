@@ -8,3 +8,5 @@ Built in seven parts; each commit runs on its own.
   `output.csv` for all requests.
 * **Part 3 (this commit) - scorer.** `python3 code/evaluation/main.py [--verbose]` scores the 32 public samples:
   status, step precision / recall / F1, field and sequence accuracy.
+* **Part 4 (this commit) - keyless resources.** `audit/attribute.py` attributes deleted accounts and anonymised
+  analytics profiles from the deletion worker's activity rows (stage offsets, result class, cross-case elimination).
